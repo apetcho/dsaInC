@@ -13,15 +13,24 @@ typedef struct SWZTrait_t {
     void (*destroy)(Object*);
 } SWZTrait_t;
 
+// -*--------------*-
+// -*- Object API -*-
+// -*--------------*-
+enum Type { TYPE_INT, TYPE_STR };
+Object* obj_new(enum Type type, ...);
+Object* obj_clone(const Object *obj);
+void obj_print(const Object *obj);
+void obj_destroy(Object *obj);
+
 // -*-----------*-
 // -*- Integer -*-
 // -*-----------*-
-Object* new_int(int value);
+//Object* new_int(int value);
 
 // -*----------*-
 // -*- String -*-
 // -*----------*-
-Object* new_string(const char *str);
+//Object* new_string(const char *str);
 
 // -*---------*-
 // -*- Stack -*-

@@ -1,6 +1,7 @@
 #include "initialDemo.h"
 
 #include<stdlib.h>
+#include<stdarg.h>
 #include<string.h>
 #include<assert.h>
 #include<stdio.h>
@@ -13,6 +14,7 @@ typedef struct {
     int value;
 } Integer;
 
+Object* new_int(int value);
 // -*-
 static void _print_integer(const Object *obj);
 static Object* _clone_integer(const Object *obj);
@@ -52,6 +54,7 @@ typedef struct {
     SWZTrait_t *traits;
     char *str;
 } String;
+Object* new_string(const char *str);
 
 static void _print_string(const Object*);
 static Object* _clone_string(const Object*);
@@ -116,7 +119,8 @@ void stack_destroy(Stack_t *stack){
     Object *obj;
     while(!stack_empty(stack)){
         obj = stack_pop(stack);
-        obj->traits->destroy(obj);
+        //obj->traits->destroy(obj);
+        obj_destroy(obj);
     }
     free(stack);
 }
@@ -125,7 +129,8 @@ void stack_destroy(Stack_t *stack){
 void stack_push(Stack_t *stack, Object* obj){
     struct StackNode *node = malloc(sizeof(*node));
     node->next = *stack;
-    node->obj = obj->traits->clone(obj);
+    //node->obj = obj->traits->clone(obj);
+    node->obj = obj_clone(obj);
     *stack = node;
 }
 
@@ -146,9 +151,58 @@ bool stack_empty(Stack_t *stack){
 
 void stack_print(const Stack_t *stack){
     for(struct StackNode const* node = *stack; node; node = node->next){
-        node->obj->traits->print(node->obj);
+        obj_print(node->obj);
         putchar(' ');
     }
     putchar('\n');
 }
 
+// -*--
+static Object* _new_int(va_list arg){
+    int value = va_arg(arg, int);
+
+    return new_int(value);
+}
+
+static Object* _new_str(va_list arg){
+    const char* str = va_arg(arg, const char*);
+    return new_string(str);
+}
+
+Object* obj_new(enum Type type, ...){
+    Object* obj;
+    va_list arg;
+    switch(type){
+    case TYPE_INT:
+        va_start(arg, type);
+        obj = _new_int(arg);
+        va_end(arg);
+        break;
+    case TYPE_STR:
+        va_start(arg, type);
+        obj = _new_str(arg);
+        va_end(arg);
+        break;
+    default:
+        fprintf(stderr, "\x1b[31mError\x1b[0m: Unknown type\n");
+        abort();
+        break; // never reached
+    }
+
+    return obj;
+}
+
+Object* obj_clone(const Object *obj){
+    assert(obj);
+    return obj->traits->clone(obj);
+}
+
+void obj_print(const Object *obj){
+    if(obj == NULL){ printf("(null)"); }
+    obj->traits->print(obj);
+}
+
+void obj_destroy(Object *obj){
+    if(!obj){ return; }
+    obj->traits->destroy(obj);
+}

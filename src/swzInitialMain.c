@@ -16,21 +16,27 @@ int main(int argc, char **argv){
     Stack_t* stack = stack_create();
     for(int i=0; i < n; i++){
         text[0] = 'a' + i;
-        obj = new_string(text);
+        //obj = new_string(text);
+        obj = obj_new(TYPE_STR, text);
         stack_push(stack, obj);
-        obj->traits->destroy(obj);
+        //obj->traits->destroy(obj);
+        obj_destroy(obj);
         stack_print(stack);
-        obj = new_int(i);
+        //obj = new_int(i);
+        obj = obj_new(TYPE_INT, i);
         stack_push(stack, obj);
-        obj->traits->destroy(obj);
+        //obj->traits->destroy(obj);
+        obj_destroy(obj);
         stack_print(stack);
     }
 
     while(!stack_empty(stack)){
         obj = stack_pop(stack);
         putchar('[');
-        obj->traits->print(obj);
-        obj->traits->destroy(obj);
+        //obj->traits->print(obj);
+        obj_print(obj);
+        //obj->traits->destroy(obj);
+        obj_destroy(obj);
         fputs("] ", stdout);
         stack_print(stack);
     }
